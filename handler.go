@@ -27,7 +27,6 @@ type wasmServer struct {
 	wasmFile      string
 	wasmExecJS    []byte
 	args          []string
-	envMap        map[string]string
 	logger        *log.Logger
 	fsHandler     *filesys.Handler
 	securityToken string
@@ -39,7 +38,6 @@ func NewWASMServer(wasmFile string, args []string, coverageFile string, l *log.L
 		wasmFile: wasmFile,
 		args:     args,
 		logger:   l,
-		envMap:   make(map[string]string),
 	}
 
 	// try for some security on an api capable of
@@ -49,11 +47,6 @@ func NewWASMServer(wasmFile string, args []string, coverageFile string, l *log.L
 		return nil, err
 	}
 	srv.fsHandler = filesys.NewHandler(srv.securityToken, l)
-
-	for _, env := range os.Environ() {
-		vars := strings.SplitN(env, "=", 2)
-		srv.envMap[vars[0]] = vars[1]
-	}
 
 	buf, err := os.ReadFile(path.Join(runtime.GOROOT(), "misc/wasm/wasm_exec.js"))
 	if err != nil {
@@ -76,14 +69,12 @@ func (ws *wasmServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		data := struct {
 			WASMFile      string
 			Args          []string
-			EnvMap        map[string]string
 			SecurityToken string
 			Pid           int
 			Ppid          int
 		}{
 			WASMFile:      filepath.Base(ws.wasmFile),
 			Args:          ws.args,
-			EnvMap:        ws.envMap,
 			SecurityToken: ws.securityToken,
 			Pid:           os.Getpid(),
 			Ppid:          os.Getppid(),

@@ -143,10 +143,6 @@ license that can be found in the LICENSE file.
 			overrideFS(globalThis.fs);
 			overrideProcess(globalThis.process);
 			go.argv = [{{range $i, $item := .Args}} {{if $i}}, {{end}} "{{$item}}" {{end}}];
-			// The notFirst variable sets itself to true after first iteration. This is to put commas in between.
-			go.env = { {{ $notFirst := false }}
-			{{range $key, $val := .EnvMap}} {{if $notFirst}}, {{end}} {{$key}}: "{{$val}}" {{ $notFirst = true }}
-			{{end}} };
 			go.exit = goExit;
 			let mod, inst;
 			await WebAssembly.instantiateStreaming(fetch("{{.WASMFile}}"), go.importObject).then((result) => {

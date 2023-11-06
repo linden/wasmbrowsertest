@@ -128,28 +128,3 @@ files and write the larger `coverage.out` file.
 In a subsequent step, use `go tool covdata -i /path/to/coverage -o coverage.out` or similar to process coverage 
 data files into the desired output format. An additional benefit is that multiple test coverage runs that write 
 their data to the same coverage directory can be merged together with this command.
-
-## Errors
-
-### `total length of command line and environment variables exceeds limit`
-
-If the error `total length of command line and environment variables exceeds limit` appears, then
-the current environment variables' total size has exceeded the maximum when executing Go Wasm binaries.
-
-To resolve this issue, install `cleanenv` and use it to prefix your command.
-
-For example, if these commands are used:
-```bash
-export GOOS=js GOARCH=wasm
-go test -cover ./...
-```
-The new commands should be the following:
-```bash
-go install github.com/agnivade/wasmbrowsertest/cmd/cleanenv@latest
-
-export GOOS=js GOARCH=wasm
-cleanenv -remove-prefix GITHUB_ -- go test -cover ./...
-```
-
-The `cleanenv` command above removes all environment variables prefixed with `GITHUB_` before running the command after the `--`.
-The `-remove-prefix` flag can be repeated multiple times to remove even more environment variables.
